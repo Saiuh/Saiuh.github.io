@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="我的个人博客"><title>分库分表历史数据迁移 | SvizzerChow's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/normalize/8.0.1/normalize.min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//lib.baomitu.com/jquery/3.4.0/jquery.min.js"></script><link rel="icon" mask sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">分库分表历史数据迁移</h1><a id="logo" href="/.">SvizzerChow's Blog</a><p class="description">Leaning</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">分库分表历史数据迁移</h1><div class="post-meta">Apr 19, 2019<span> | </span><span class="category"><a href="/categories/数据库/">数据库</a></span></div><div class="post-content"><h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>历史数据为一个时间点前的所有数据，是一个固定数量的记录。</p>
+<p>对于历史数据迁移有两个比较粗略的方案：</p>
+<ol>
+<li>运维团队提供数据库迁移工具，数据库层面直接迁移；</li>
+<li>自己开发数据迁移程序，通过sql的方式进行迁移；</li>
+</ol>
+<a id="more"></a>
+<h1 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h1><h2 id="方案一：运维工具"><a href="#方案一：运维工具" class="headerlink" title="方案一：运维工具"></a>方案一：运维工具</h2><p>目前运维提供数据迁移只能实现整库或者整表的数据迁移，而分库分表需求中是要将一个单一库中数据迁移到多个不同的表中，所以运维的迁移<strong>不适用</strong>。</p>
+<h2 id="方案二：迁移程序（insert-into-…-select-from）"><a href="#方案二：迁移程序（insert-into-…-select-from）" class="headerlink" title="方案二：迁移程序（insert into … select * from）"></a>方案二：迁移程序（insert into … select * from）</h2><p>迁移逻辑如下：</p>
+<ol>
+<li>分页读取 <strong>sell_chance </strong>表中的店铺号；</li>
+<li>将读取的店铺号根据分表算法确定要迁移到的目标表 <strong>x</strong> ；</li>
+<li>使用 <strong>insert into sell_chance_x select * from sell_chance where shop_code in (1, 2, …); 将同一个目标表的店铺一起迁移；</strong></li>
+<li>循环执行，直到查询不到店铺号。</li>
+</ol>
+<h2 id="方案三：迁移程序（insert-into-…-select-from）"><a href="#方案三：迁移程序（insert-into-…-select-from）" class="headerlink" title="方案三：迁移程序（insert into … select * from）"></a>方案三：迁移程序（insert into … select * from）</h2><p><strong>方案三与方案二的区别在于分表算法的计算迁移到了sql中</strong>；</p>
+<p>迁移逻辑如下：</p>
+<ol>
+<li>遍历分表数 <strong>x (0~39);</strong></li>
+<li>执行迁移sql： <strong>insert into sell_chance_x select * from sell_chance where CONVERT(**</strong>right<strong>**(shop_code, 3), SIGNED) mod 40 = x; </strong></li>
+</ol>
+<h2 id="方案四：迁移程序-insert-into-…-values"><a href="#方案四：迁移程序-insert-into-…-values" class="headerlink" title="方案四：迁移程序 (insert into … () values (?,?),(?,?))"></a>方案四：迁移程序 (insert into … () values (?,?),(?,?))</h2><p>将程序分为读取和写入两部分，有不同线程处理；</p>
+<p>迁移逻辑如下：</p>
+<ul>
+<li>读线程：<ol>
+<li>分页读取 <strong>sell_chance </strong>表中的店铺号；</li>
+<li>根据店铺号分页读取数据(<strong>select * from sell_chance where shop_code=? limit m,n</strong>);</li>
+<li>将读取的店铺号根据分表算法确定要迁移到的目标表<strong> x</strong> ；</li>
+<li>将数据存储到队列中(BlockingQueue)；</li>
+<li>循环执行，直到数据取完，发送结束信号。</li>
+</ol>
+</li>
+</ul>
+<ul>
+<li>写线程：<ol>
+<li>读取队列中(BlockingQueue)的数据；</li>
+<li>保存数据(<strong>insert into sell_chance_x (…) values (?,…),(?,…));</strong></li>
+<li>循环读取，直到读取完毕且收到结束信号；</li>
+</ol>
+</li>
+</ul>
+<p>优化：并发读；写线程与目标表绑定，固定写一部分表去除并发写的情况。</p>
+<h1 id="性能测试"><a href="#性能测试" class="headerlink" title="性能测试"></a>性能测试</h1><p>测试条件：<br>-Xmx4096m -Xms4096m<br>CPU：4c8t  3GHz</p>
+<p>80605条数据为测试库；<br>19267385条数据为线上数据克隆库；</p>
+<table>
+<thead>
+<tr>
+<th>数据条数</th>
+<th>方案2（ms）</th>
+<th>方案3（ms）</th>
+<th>方案4（ms）</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>80605</td>
+<td>73216</td>
+<td>32522（多线程）</td>
+<td>28175</td>
+<td>有索引、InnoDB</td>
+</tr>
+<tr>
+<td>80605</td>
+<td>79368</td>
+<td>42250（单线程）</td>
+<td>36613</td>
+<td>有索引、InnoDB</td>
+</tr>
+<tr>
+<td>80605</td>
+<td>79953</td>
+<td>22690（单线程）</td>
+<td>17787</td>
+<td>无索引、MyISAM</td>
+</tr>
+<tr>
+<td>80605</td>
+<td>85618</td>
+<td>8418（多线程）</td>
+<td>17126</td>
+<td>无索引、MyISAM</td>
+</tr>
+<tr>
+<td>80605</td>
+<td></td>
+<td>6903（多线程）</td>
+<td>18175</td>
+<td>无索引、MyISAM</td>
+</tr>
+<tr>
+<td>19267385</td>
+<td></td>
+<td>220291(多线程)</td>
+<td>4380463</td>
+<td>无索引、MyISAM</td>
+</tr>
+<tr>
+<td>19267385</td>
+<td></td>
+<td>347974(多线程)</td>
+<td></td>
+<td>有索引、InnoDB</td>
+</tr>
+</tbody>
+</table>
+<h1 id="选择"><a href="#选择" class="headerlink" title="选择"></a>选择</h1><p>综合各个方案的实现与性能方面的考量，最终选择方案3，实现简单，且性能高。</p>
+</div><div class="tags"><a href="/tags/数据库/">数据库</a><a href="/tags/分库分表/">分库分表</a></div><div class="post-nav"><a class="pre" href="/2019/04/25/redis源码(2)简单动态字符串/">Redis源码(2):简单动态字符串SDS</a><a class="next" href="/2019/04/11/redis源码(1)数据结构及底层实现/">Redis源码(1):数据结构及底层实现</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"><input type="hidden" name="sitesearch" value="https://SvizzerChow.github.io"></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Sentinel/">Sentinel</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/sharding-jdbc/">sharding-jdbc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/">分布式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/并发/">并发</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据库/">数据库</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/虚拟机/">虚拟机</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/原子性/" style="font-size: 15px;">原子性</a> <a href="/tags/BASE理论/" style="font-size: 15px;">BASE理论</a> <a href="/tags/虚拟机/" style="font-size: 15px;">虚拟机</a> <a href="/tags/JavaAgent/" style="font-size: 15px;">JavaAgent</a> <a href="/tags/集合/" style="font-size: 15px;">集合</a> <a href="/tags/可见性/" style="font-size: 15px;">可见性</a> <a href="/tags/内存模型/" style="font-size: 15px;">内存模型</a> <a href="/tags/MESI/" style="font-size: 15px;">MESI</a> <a href="/tags/volatile/" style="font-size: 15px;">volatile</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/channel/" style="font-size: 15px;">channel</a> <a href="/tags/NIO/" style="font-size: 15px;">NIO</a> <a href="/tags/限流/" style="font-size: 15px;">限流</a> <a href="/tags/降级/" style="font-size: 15px;">降级</a> <a href="/tags/熔断/" style="font-size: 15px;">熔断</a> <a href="/tags/Sentinel/" style="font-size: 15px;">Sentinel</a> <a href="/tags/源码解析/" style="font-size: 15px;">源码解析</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/NoSQL/" style="font-size: 15px;">NoSQL</a> <a href="/tags/CAP理论/" style="font-size: 15px;">CAP理论</a> <a href="/tags/long/" style="font-size: 15px;">long</a> <a href="/tags/double/" style="font-size: 15px;">double</a> <a href="/tags/并发/" style="font-size: 15px;">并发</a> <a href="/tags/sentinel/" style="font-size: 15px;">sentinel</a> <a href="/tags/zookeeper/" style="font-size: 15px;">zookeeper</a> <a href="/tags/分布式锁/" style="font-size: 15px;">分布式锁</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分库分表/" style="font-size: 15px;">分库分表</a> <a href="/tags/多线程/" style="font-size: 15px;">多线程</a> <a href="/tags/线程池/" style="font-size: 15px;">线程池</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/FutureTask/" style="font-size: 15px;">FutureTask</a> <a href="/tags/AbstractExecutorService/" style="font-size: 15px;">AbstractExecutorService</a> <a href="/tags/ThreadPoolExecutor/" style="font-size: 15px;">ThreadPoolExecutor</a> <a href="/tags/ScheduledThreadPoolExecutor/" style="font-size: 15px;">ScheduledThreadPoolExecutor</a> <a href="/tags/缓存/" style="font-size: 15px;">缓存</a> <a href="/tags/缓存行/" style="font-size: 15px;">缓存行</a> <a href="/tags/轮询/" style="font-size: 15px;">轮询</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/sharding-jdbc/" style="font-size: 15px;">sharding-jdbc</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/12/09/Netty之旅14ChannelHandler/">Netty解析十二：ChannelHandler</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/08/Netty之旅13ChannelPipeline/">Netty解析十一：ChannelPipeline与DefaultChannelPipeline</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/07/netty之旅12Channel/">Netty解析十：channel与AbstractNioChannel</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/06/volatile几个场景总结/">volatile几个场景总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/05/long和double使用volatile实现原子性/">volatile long/double原子读写原理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/04/缓存行优化/">缓存行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/03/MESI与内存屏障/">既然有了MESI协议为什么还要volatile来保证可见性</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/02/Netty之旅11SingleThreadEventLoop/">Netty解析九：EventLoop的基类SingleThreadEventLoop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/01/Netty之旅10Promise/">Netty解析八：可写的Future类【Promise】</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/30/Netty之旅9FastThreadLocal/">Netty解析七：快速的FastThreadLocal</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017-2020 <a href="/." rel="nofollow">SvizzerChow's Blog.</a><a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn"> 浙icp备330500251067号</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

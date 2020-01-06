@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="我的个人博客"><title>网络基础 | SvizzerChow's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/normalize/8.0.1/normalize.min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//lib.baomitu.com/jquery/3.4.0/jquery.min.js"></script><link rel="icon" mask sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">网络基础</h1><a id="logo" href="/.">SvizzerChow's Blog</a><p class="description">Leaning</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">网络基础</h1><div class="post-meta">Mar 4, 2019<span> | </span><span class="category"><a href="/categories/网络/">网络</a></span></div><div class="post-content"><p>对一些简单内容的总结，详细阅读参考内的文章。<br><a id="more"></a></p>
+<h1 id="网络模型"><a href="#网络模型" class="headerlink" title="网络模型"></a>网络模型</h1><p><img src="https://github.com/CyC2018/CS-Notes/raw/master/docs/notes/pics/f5d40b01-abf2-435e-9ce7-7889c41b2fa6.jpg" alt></p>
+<table>
+<thead>
+<tr>
+<th>OSI 七层模型</th>
+<th>TCP/IP 四层模型</th>
+<th>相关</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>应用层</td>
+<td>应用层</td>
+<td>-</td>
+</tr>
+<tr>
+<td>表示层</td>
+<td>应用层</td>
+<td>-</td>
+</tr>
+<tr>
+<td>会话层</td>
+<td>应用层</td>
+<td>-</td>
+</tr>
+<tr>
+<td>传输层</td>
+<td>传输层</td>
+<td>UDP/TCP    </td>
+</tr>
+<tr>
+<td>网络层</td>
+<td>网际层</td>
+<td>IP，路由器</td>
+</tr>
+<tr>
+<td>数据链路层</td>
+<td>网络接口层</td>
+<td>帧, mac地址，交换机，以太网</td>
+</tr>
+<tr>
+<td>物理层</td>
+<td>网络接口层</td>
+<td>字节bit，通信方式</td>
+</tr>
+</tbody>
+</table>
+<h1 id="TCP-IP"><a href="#TCP-IP" class="headerlink" title="TCP/IP"></a>TCP/IP</h1><h2 id="UDP-和-TCP-的特点"><a href="#UDP-和-TCP-的特点" class="headerlink" title="UDP 和 TCP 的特点"></a>UDP 和 TCP 的特点</h2><ul>
+<li><p>用户数据报协议 UDP（User Datagram Protocol）是无连接的，尽最大可能交付，没有拥塞控制，面向报文（对于应用程序传下来的报文不合并也不拆分，只是添加 UDP 首部），支持一对一、一对多、多对一和多对多的交互通信。</p>
+</li>
+<li><p>传输控制协议 TCP（Transmission Control Protocol）是面向连接的，提供可靠交付，有流量控制，拥塞控制，提供全双工通信，面向字节流（把应用层传下来的报文看成字节流，把字节流组织成大小不等的数据块），每一条 TCP 连接只能是点对点的（一对一）。</p>
+</li>
+</ul>
+<h2 id="TCP-的三次握手"><a href="#TCP-的三次握手" class="headerlink" title="TCP 的三次握手"></a>TCP 的三次握手</h2><p><a href="https://github.com/CyC2018/CS-Notes/blob/master/docs/notes/pics/e92d0ebc-7d46-413b-aec1-34a39602f787.png" target="_blank" rel="noopener"></a><br>假设 A 为客户端，B 为服务器端。</p>
+<ul>
+<li><p>首先 B 处于 LISTEN（监听）状态，等待客户的连接请求。</p>
+</li>
+<li><p>A 向 B 发送连接请求报文，SYN=1，ACK=0，选择一个初始的序号 x。</p>
+</li>
+<li><p>B 收到连接请求报文，如果同意建立连接，则向 A 发送连接确认报文，SYN=1，ACK=1，确认号为 x+1，同时也选择一个初始的序号 y。</p>
+</li>
+</ul>
+<p>A 收到 B 的连接确认报文后，还要向 B 发出确认，确认号为 y+1，序号为 x+1。</p>
+<p>B 收到 A 的确认后，连接建立。</p>
+<p><strong>三次握手的原因</strong></p>
+<p>第三次握手是为了防止失效的连接请求到达服务器，让服务器错误打开连接。</p>
+<p>客户端发送的连接请求如果在网络中滞留，那么就会隔很长一段时间才能收到服务器端发回的连接确认。客户端等待一个超时重传时间之后，就会重新请求连接。但是这个滞留的连接请求最后还是会到达服务器，如果不进行三次握手，那么服务器就会打开两个连接。如果有第三次握手，客户端会忽略服务器之后发送的对滞留连接请求的连接确认，不进行第三次握手，因此就不会再次打开连接。</p>
+<h2 id="TCP-的四次挥手"><a href="#TCP-的四次挥手" class="headerlink" title="TCP 的四次挥手"></a>TCP 的四次挥手</h2><p><a href="https://github.com/CyC2018/CS-Notes/raw/master/docs/notes/pics/f87afe72-c2df-4c12-ac03-9b8d581a8af8.jpg" target="_blank" rel="noopener"></a><br>以下描述不讨论序号和确认号，因为序号和确认号的规则比较简单。并且不讨论 ACK，因为 ACK 在连接建立之后都为 1。</p>
+<ul>
+<li><p>A 发送连接释放报文，FIN=1。</p>
+</li>
+<li><p>B 收到之后发出确认，此时 TCP 属于半关闭状态，B 能向 A 发送数据但是 A 不能向 B 发送数据。</p>
+</li>
+<li><p>当 B 不再需要连接时，发送连接释放报文，FIN=1。</p>
+</li>
+<li><p>A 收到后发出确认，进入 TIME-WAIT 状态，等待 2 MSL（最大报文存活时间）后释放连接。</p>
+</li>
+<li><p>B 收到 A 的确认后释放连接。</p>
+</li>
+</ul>
+<p><strong>四次挥手的原因</strong></p>
+<pre><code>客户端发送了 FIN 连接释放报文之后，服务器收到了这个报文，就进入了 CLOSE-WAIT 状态。这个状态是为了让服务器端发送还未传送完毕的数据，传送完毕之后，服务器会发送 FIN 连接释放报文。
+</code></pre><p>TIME_WAIT</p>
+<ul>
+<li><p>客户端接收到服务器端的 FIN 报文后进入此状态，此时并不是直接进入 CLOSED 状态，还需要等待一个时间计时器设置的时间 2MSL。这么做有两个理由：</p>
+</li>
+<li><p>确保最后一个确认报文能够到达。如果 B 没收到 A 发送来的确认报文，那么就会重新发送连接释放请求报文，A 等待一段时间就是为了处理这种情况的发生。</p>
+</li>
+<li><p>等待一段时间是为了让本连接持续时间内所产生的所有报文都从网络中消失，使得下一个新的连接不会出现旧的连接请求报文。</p>
+</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><p><a href="https://github.com/CyC2018/CS-Notes/blob/master/docs/notes/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C.md#%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BD%91%E7%BB%9C%E4%BD%93%E7%B3%BB%E7%BB%93%E6%9E%84" target="_blank" rel="noopener">计算机网络</a></p>
+</div><div class="tags"><a href="/tags/网络/">网络</a></div><div class="post-nav"><a class="pre" href="/2019/03/05/数据库基础/">数据库基础</a><a class="next" href="/2019/03/04/zk解析(13)-关键点总结/">zk解析(13)：关键点总结</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"><input type="hidden" name="sitesearch" value="https://SvizzerChow.github.io"></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Sentinel/">Sentinel</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/sharding-jdbc/">sharding-jdbc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/">分布式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/并发/">并发</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据库/">数据库</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/虚拟机/">虚拟机</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/原子性/" style="font-size: 15px;">原子性</a> <a href="/tags/BASE理论/" style="font-size: 15px;">BASE理论</a> <a href="/tags/虚拟机/" style="font-size: 15px;">虚拟机</a> <a href="/tags/JavaAgent/" style="font-size: 15px;">JavaAgent</a> <a href="/tags/集合/" style="font-size: 15px;">集合</a> <a href="/tags/可见性/" style="font-size: 15px;">可见性</a> <a href="/tags/内存模型/" style="font-size: 15px;">内存模型</a> <a href="/tags/MESI/" style="font-size: 15px;">MESI</a> <a href="/tags/volatile/" style="font-size: 15px;">volatile</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/channel/" style="font-size: 15px;">channel</a> <a href="/tags/NIO/" style="font-size: 15px;">NIO</a> <a href="/tags/限流/" style="font-size: 15px;">限流</a> <a href="/tags/降级/" style="font-size: 15px;">降级</a> <a href="/tags/熔断/" style="font-size: 15px;">熔断</a> <a href="/tags/Sentinel/" style="font-size: 15px;">Sentinel</a> <a href="/tags/源码解析/" style="font-size: 15px;">源码解析</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/NoSQL/" style="font-size: 15px;">NoSQL</a> <a href="/tags/CAP理论/" style="font-size: 15px;">CAP理论</a> <a href="/tags/long/" style="font-size: 15px;">long</a> <a href="/tags/double/" style="font-size: 15px;">double</a> <a href="/tags/并发/" style="font-size: 15px;">并发</a> <a href="/tags/sentinel/" style="font-size: 15px;">sentinel</a> <a href="/tags/zookeeper/" style="font-size: 15px;">zookeeper</a> <a href="/tags/分布式锁/" style="font-size: 15px;">分布式锁</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分库分表/" style="font-size: 15px;">分库分表</a> <a href="/tags/多线程/" style="font-size: 15px;">多线程</a> <a href="/tags/线程池/" style="font-size: 15px;">线程池</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/FutureTask/" style="font-size: 15px;">FutureTask</a> <a href="/tags/AbstractExecutorService/" style="font-size: 15px;">AbstractExecutorService</a> <a href="/tags/ThreadPoolExecutor/" style="font-size: 15px;">ThreadPoolExecutor</a> <a href="/tags/ScheduledThreadPoolExecutor/" style="font-size: 15px;">ScheduledThreadPoolExecutor</a> <a href="/tags/缓存/" style="font-size: 15px;">缓存</a> <a href="/tags/缓存行/" style="font-size: 15px;">缓存行</a> <a href="/tags/轮询/" style="font-size: 15px;">轮询</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/sharding-jdbc/" style="font-size: 15px;">sharding-jdbc</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/12/09/Netty之旅14ChannelHandler/">Netty解析十二：ChannelHandler</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/08/Netty之旅13ChannelPipeline/">Netty解析十一：ChannelPipeline与DefaultChannelPipeline</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/07/netty之旅12Channel/">Netty解析十：channel与AbstractNioChannel</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/06/volatile几个场景总结/">volatile几个场景总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/05/long和double使用volatile实现原子性/">volatile long/double原子读写原理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/04/缓存行优化/">缓存行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/03/MESI与内存屏障/">既然有了MESI协议为什么还要volatile来保证可见性</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/02/Netty之旅11SingleThreadEventLoop/">Netty解析九：EventLoop的基类SingleThreadEventLoop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/01/Netty之旅10Promise/">Netty解析八：可写的Future类【Promise】</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/30/Netty之旅9FastThreadLocal/">Netty解析七：快速的FastThreadLocal</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017-2020 <a href="/." rel="nofollow">SvizzerChow's Blog.</a><a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn"> 浙icp备330500251067号</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

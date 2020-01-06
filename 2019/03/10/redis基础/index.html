@@ -1,0 +1,250 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="我的个人博客"><title>Redis基础 | SvizzerChow's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/normalize/8.0.1/normalize.min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//lib.baomitu.com/jquery/3.4.0/jquery.min.js"></script><link rel="icon" mask sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Redis基础</h1><a id="logo" href="/.">SvizzerChow's Blog</a><p class="description">Leaning</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Redis基础</h1><div class="post-meta">Mar 10, 2019<span> | </span><span class="category"><a href="/categories/redis/">redis</a></span></div><div class="post-content"><h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p>Redis 是速度非常快的非关系型（NoSQL）内存键值数据库，可以存储键和五种不同类型的值之间的映射。</p>
+<p>键的类型只能为字符串，值支持五种数据类型：字符串、列表、集合、散列表、有序集合。</p>
+<p>Redis 支持很多特性，例如将内存中的数据持久化到硬盘中，使用复制来扩展读性能，使用分片来扩展写性能。<br><a id="more"></a></p>
+<h1 id="数据类型"><a href="#数据类型" class="headerlink" title="数据类型"></a>数据类型</h1><table>
+<thead>
+<tr>
+<th>数据类型</th>
+<th>值类型</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>STRING</td>
+<td>字符串</td>
+</tr>
+<tr>
+<td>LIST</td>
+<td>列表</td>
+</tr>
+<tr>
+<td>SET</td>
+<td>无序集合</td>
+</tr>
+<tr>
+<td>HASH</td>
+<td>包含键值对的无序散列表</td>
+</tr>
+<tr>
+<td>ZSET</td>
+<td>有序集合</td>
+</tr>
+</tbody>
+</table>
+<h1 id="操作"><a href="#操作" class="headerlink" title="操作"></a>操作</h1><h2 id="key"><a href="#key" class="headerlink" title="key"></a>key</h2><p><strong>键是否存在 EXISTS</strong></p>
+<blockquote>
+<p>EXISTS key </p>
+</blockquote>
+<p><strong>移除 key 的过期时间，key 将持久保持 PERSIST</strong></p>
+<blockquote>
+<p>PERSIST key </p>
+</blockquote>
+<p><strong>以毫秒为单位返回 key 的剩余的过期时间 PTTL</strong></p>
+<blockquote>
+<p>PTTL key  </p>
+</blockquote>
+<h2 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h2><p><strong>添加 set</strong></p>
+<blockquote>
+<p>set key value</p>
+</blockquote>
+<p><strong>查询 get</strong></p>
+<blockquote>
+<p>get key</p>
+</blockquote>
+<p><strong>删除 del</strong></p>
+<blockquote>
+<p>del key</p>
+</blockquote>
+<h2 id="列表"><a href="#列表" class="headerlink" title="列表"></a>列表</h2><p><strong>添加 rpush</strong></p>
+<blockquote>
+<p>rpush key value</p>
+</blockquote>
+<p><strong>返回列表中指定区间内的元素 lrange</strong></p>
+<blockquote>
+<p>lrange start end</p>
+</blockquote>
+<p><strong>通过索引获取列表中的元素 lindex</strong></p>
+<blockquote>
+<p>lindex lindex</p>
+</blockquote>
+<p><strong>移出并获取列表的第一个元素LPOP key</strong></p>
+<blockquote>
+<p>LPOP key </p>
+</blockquote>
+<h2 id="无序集合"><a href="#无序集合" class="headerlink" title="无序集合"></a>无序集合</h2><p><strong>向集合添加一个或多个成员 SADD</strong></p>
+<blockquote>
+<p>SADD key member1 member2</p>
+</blockquote>
+<p><strong>返回集合中的所有成员 smembers</strong></p>
+<blockquote>
+<p>smembers set-key</p>
+</blockquote>
+<p><strong>判断 member 元素是否是集合 key 的成员 sismember</strong></p>
+<blockquote>
+<p>sismember set-key item4</p>
+</blockquote>
+<p><strong>移除集合中一个或多个成员 srem</strong></p>
+<blockquote>
+<p>srem set-key item2</p>
+</blockquote>
+<h2 id="有序集合"><a href="#有序集合" class="headerlink" title="有序集合"></a>有序集合</h2><p><strong>向有序集合添加一个或多个成员，或者更新已存在成员的分数 zadd</strong></p>
+<blockquote>
+<p>ZADD key score1 member1 [score2 member2] </p>
+</blockquote>
+<p><strong>通过索引区间返回有序集合成指定区间内的成员 zrange</strong></p>
+<blockquote>
+<p>ZRANGE key start stop [WITHSCORES] </p>
+</blockquote>
+<p><strong>通过分数返回有序集合指定区间内的成员 zrangebyscore</strong></p>
+<blockquote>
+<p>ZRANGEBYSCORE key min max [WITHSCORES] [LIMIT] </p>
+</blockquote>
+<h2 id="哈希表"><a href="#哈希表" class="headerlink" title="哈希表"></a>哈希表</h2><p><strong>将哈希表 key 中的字段 field 的值设为 value hset</strong></p>
+<blockquote>
+<p>HSET key field value </p>
+</blockquote>
+<p><strong>获取在哈希表中指定 key 的所有字段和值 hgetall</strong></p>
+<blockquote>
+<p>HGETALL key </p>
+</blockquote>
+<p><strong>删除一个或多个哈希表字段 hdel</strong></p>
+<blockquote>
+<p>HDEL key field1 [field2] </p>
+</blockquote>
+<h1 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h1><h2 id="字典"><a href="#字典" class="headerlink" title="字典"></a>字典</h2><p>dictht 是一个散列表结构，使用拉链法保存哈希冲突。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* This is our hash table structure. Every dictionary has two of this as we</span></span><br><span class="line"><span class="comment"> * implement incremental rehashing, for the old to the new table. */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dictht</span> &#123;</span></span><br><span class="line">    dictEntry **table;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> size;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> sizemask;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> used;</span><br><span class="line">&#125; dictht;</span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span> &#123;</span></span><br><span class="line">    <span class="keyword">void</span> *key;</span><br><span class="line">    <span class="keyword">union</span> &#123;</span><br><span class="line">        <span class="keyword">void</span> *val;</span><br><span class="line">        <span class="keyword">uint64_t</span> u64;</span><br><span class="line">        <span class="keyword">int64_t</span> s64;</span><br><span class="line">        <span class="keyword">double</span> d;</span><br><span class="line">    &#125; v;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">dictEntry</span> *<span class="title">next</span>;</span></span><br><span class="line">&#125; dictEntry;</span><br></pre></td></tr></table></figure></p>
+<p>Redis 的字典 dict 中包含两个哈希表 dictht，这是为了方便进行 rehash 操作。在扩容时，将其中一个 dictht 上的键值对 rehash 到另一个 dictht 上面，完成之后释放空间并交换两个 dictht 的角色。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">dict</span> &#123;</span></span><br><span class="line">    dictType *type;</span><br><span class="line">    <span class="keyword">void</span> *privdata;</span><br><span class="line">    dictht ht[<span class="number">2</span>];</span><br><span class="line">    <span class="keyword">long</span> rehashidx; <span class="comment">/* rehashing not in progress if rehashidx == -1 */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> iterators; <span class="comment">/* number of iterators currently running */</span></span><br><span class="line">&#125; dict;</span><br></pre></td></tr></table></figure></p>
+<p>rehash 操作不是一次性完成，而是采用渐进方式，这是为了避免一次性执行过多的 rehash 操作给服务器带来过大的负担。</p>
+<p>渐进式 rehash 通过记录 dict 的 rehashidx 完成，它从 0 开始，然后每执行一次 rehash 都会递增。例如在一次 rehash 中，要把 dict[0] rehash 到 dict[1]，这一次会把 dict[0] 上 table[rehashidx] 的键值对 rehash 到 dict[1] 上，dict[0] 的 table[rehashidx] 指向 null，并令 rehashidx++。</p>
+<p>在 rehash 期间，每次对字典执行添加、删除、查找或者更新操作时，都会执行一次渐进式 rehash。</p>
+<p>采用渐进式 rehash 会导致字典中的数据分散在两个 dictht 上，因此对字典的查找操作也需要到对应的 dictht 去执行。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Performs N steps of incremental rehashing. Returns 1 if there are still</span></span><br><span class="line"><span class="comment"> * keys to move from the old to the new hash table, otherwise 0 is returned.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * Note that a rehashing step consists in moving a bucket (that may have more</span></span><br><span class="line"><span class="comment"> * than one key as we use chaining) from the old to the new hash table, however</span></span><br><span class="line"><span class="comment"> * since part of the hash table may be composed of empty spaces, it is not</span></span><br><span class="line"><span class="comment"> * guaranteed that this function will rehash even a single bucket, since it</span></span><br><span class="line"><span class="comment"> * will visit at max N*10 empty buckets in total, otherwise the amount of</span></span><br><span class="line"><span class="comment"> * work it does would be unbound and the function may block for a long time. */</span></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">dictRehash</span><span class="params">(dict *d, <span class="keyword">int</span> n)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">int</span> empty_visits = n * <span class="number">10</span>; <span class="comment">/* Max number of empty buckets to visit. */</span></span><br><span class="line">    <span class="keyword">if</span> (!dictIsRehashing(d)) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (n-- &amp;&amp; d-&gt;ht[<span class="number">0</span>].used != <span class="number">0</span>) &#123;</span><br><span class="line">        dictEntry *de, *nextde;</span><br><span class="line"></span><br><span class="line">        <span class="comment">/* Note that rehashidx can't overflow as we are sure there are more</span></span><br><span class="line"><span class="comment">         * elements because ht[0].used != 0 */</span></span><br><span class="line">        assert(d-&gt;ht[<span class="number">0</span>].size &gt; (<span class="keyword">unsigned</span> <span class="keyword">long</span>) d-&gt;rehashidx);</span><br><span class="line">        <span class="keyword">while</span> (d-&gt;ht[<span class="number">0</span>].table[d-&gt;rehashidx] == <span class="literal">NULL</span>) &#123;</span><br><span class="line">            d-&gt;rehashidx++;</span><br><span class="line">            <span class="keyword">if</span> (--empty_visits == <span class="number">0</span>) <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        de = d-&gt;ht[<span class="number">0</span>].table[d-&gt;rehashidx];</span><br><span class="line">        <span class="comment">/* Move all the keys in this bucket from the old to the new hash HT */</span></span><br><span class="line">        <span class="keyword">while</span> (de) &#123;</span><br><span class="line">            <span class="keyword">uint64_t</span> h;</span><br><span class="line"></span><br><span class="line">            nextde = de-&gt;next;</span><br><span class="line">            <span class="comment">/* Get the index in the new hash table */</span></span><br><span class="line">            h = dictHashKey(d, de-&gt;key) &amp; d-&gt;ht[<span class="number">1</span>].sizemask;</span><br><span class="line">            de-&gt;next = d-&gt;ht[<span class="number">1</span>].table[h];</span><br><span class="line">            d-&gt;ht[<span class="number">1</span>].table[h] = de;</span><br><span class="line">            d-&gt;ht[<span class="number">0</span>].used--;</span><br><span class="line">            d-&gt;ht[<span class="number">1</span>].used++;</span><br><span class="line">            de = nextde;</span><br><span class="line">        &#125;</span><br><span class="line">        d-&gt;ht[<span class="number">0</span>].table[d-&gt;rehashidx] = <span class="literal">NULL</span>;</span><br><span class="line">        d-&gt;rehashidx++;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* Check if we already rehashed the whole table... */</span></span><br><span class="line">    <span class="keyword">if</span> (d-&gt;ht[<span class="number">0</span>].used == <span class="number">0</span>) &#123;</span><br><span class="line">        zfree(d-&gt;ht[<span class="number">0</span>].table);</span><br><span class="line">        d-&gt;ht[<span class="number">0</span>] = d-&gt;ht[<span class="number">1</span>];</span><br><span class="line">        _dictReset(&amp;d-&gt;ht[<span class="number">1</span>]);</span><br><span class="line">        d-&gt;rehashidx = <span class="number">-1</span>;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* More to rehash... */</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="跳跃表"><a href="#跳跃表" class="headerlink" title="跳跃表"></a>跳跃表</h2><p>是有序集合的底层实现之一。</p>
+<p>跳跃表是基于多指针有序链表实现的，可以看成多个有序链表。</p>
+<p>在查找时，从上层指针开始查找，找到对应的区间之后再到下一层去查找。</p>
+<p>与红黑树等平衡树相比，跳跃表具有以下优点：</p>
+<ol>
+<li>插入速度非常快速，因为不需要进行旋转等操作来维护平衡性；</li>
+<li>更容易实现；</li>
+<li>支持无锁操作。</li>
+</ol>
+<h1 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h1><h2 id="计数器"><a href="#计数器" class="headerlink" title="计数器"></a>计数器</h2><p>可以对 String 进行自增自减运算，从而实现计数器功能。</p>
+<p>Redis 这种内存型数据库的读写性能非常高，很适合存储频繁读写的计数量。</p>
+<h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2><p>将热点数据放到内存中，设置内存的最大使用量以及淘汰策略来保证缓存的命中率。</p>
+<h2 id="查找表"><a href="#查找表" class="headerlink" title="查找表"></a>查找表</h2><p>例如 DNS 记录就很适合使用 Redis 进行存储。</p>
+<p>查找表和缓存类似，也是利用了 Redis 快速的查找特性。但是查找表的内容不能失效，而缓存的内容可以失效，因为缓存不作为可靠的数据来源。</p>
+<h2 id="消息队列"><a href="#消息队列" class="headerlink" title="消息队列"></a>消息队列</h2><p>List 是一个双向链表，可以通过 lpop 和 lpush 写入和读取消息。</p>
+<p>不过最好使用 Kafka、RabbitMQ 等消息中间件。</p>
+<h2 id="会话缓存"><a href="#会话缓存" class="headerlink" title="会话缓存"></a>会话缓存</h2><p>可以使用 Redis 来统一存储多台应用服务器的会话信息。</p>
+<p>当应用服务器不再存储用户的会话信息，也就不再具有状态，一个用户可以请求任意一个应用服务器，从而更容易实现高可用性以及可伸缩性。</p>
+<h2 id="分布式锁实现"><a href="#分布式锁实现" class="headerlink" title="分布式锁实现"></a>分布式锁实现</h2><p>在分布式场景下，无法使用单机环境下的锁来对多个节点上的进程进行同步。</p>
+<p>可以使用 Reids 自带的 SETNX 命令实现分布式锁，除此之外，还可以使用官方提供的 RedLock 分布式锁实现。</p>
+<h2 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h2><p>Set 可以实现交集、并集等操作，从而实现共同好友等功能。</p>
+<p>ZSet 可以实现有序性操作，从而实现排行榜等功能。</p>
+<h1 id="键的过期时间"><a href="#键的过期时间" class="headerlink" title="键的过期时间"></a>键的过期时间</h1><p>Redis 可以为每个键设置过期时间，当键过期时，会自动删除该键。</p>
+<p>对于散列表这种容器，只能为整个键设置过期时间（整个散列表），而不能为键里面的单个元素设置过期时间。</p>
+<h1 id="数据淘汰策略"><a href="#数据淘汰策略" class="headerlink" title="数据淘汰策略"></a>数据淘汰策略</h1><p>可以设置内存最大使用量，当内存使用量超出时，会施行数据淘汰策略。</p>
+<p>Reids 具体有 6 种淘汰策略：</p>
+<table>
+<thead>
+<tr>
+<th>策略</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>volatile-lru</td>
+<td>从已设置过期时间的数据集中挑选最近最少使用的数据淘汰</td>
+</tr>
+<tr>
+<td>volatile-ttl</td>
+<td>从已设置过期时间的数据集中挑选将要过期的数据淘汰</td>
+</tr>
+<tr>
+<td>volatile-random</td>
+<td>从已设置过期时间的数据集中任意选择数据淘汰</td>
+</tr>
+<tr>
+<td>allkeys-lru</td>
+<td>从所有数据集中挑选最近最少使用的数据淘汰</td>
+</tr>
+<tr>
+<td>allkeys-random</td>
+<td>从所有数据集中任意选择数据进行淘汰</td>
+</tr>
+<tr>
+<td>noeviction</td>
+<td>禁止驱逐数据</td>
+</tr>
+</tbody>
+</table>
+<p>作为内存数据库，出于对性能和内存消耗的考虑，Redis 的淘汰算法实际实现上并非针对所有 key，而是抽样一小部分并且从中选出被淘汰的 key。</p>
+<p>使用 Redis 缓存数据时，为了提高缓存命中率，需要保证缓存数据都是热点数据。可以将内存最大使用量设置为热点数据占用的内存量，然后启用 allkeys-lru 淘汰策略，将最近最少使用的数据淘汰。</p>
+<p>Redis 4.0 引入了 volatile-lfu 和 allkeys-lfu 淘汰策略，LFU 策略通过统计访问频率，将访问频率最少的键值对淘汰。</p>
+<h1 id="持久化"><a href="#持久化" class="headerlink" title="持久化"></a>持久化</h1><p>Redis 是内存型数据库，为了保证数据在断电后不会丢失，需要将内存中的数据持久化到硬盘上。</p>
+<h2 id="RDB持久化"><a href="#RDB持久化" class="headerlink" title="RDB持久化"></a>RDB持久化</h2><p>将某个时间点的所有数据都存放到硬盘上。</p>
+<p>可以将快照复制到其它服务器从而创建具有相同数据的服务器副本。</p>
+<p>如果系统发生故障，将会丢失最后一次创建快照之后的数据。</p>
+<p>如果数据量很大，保存快照的时间会很长。</p>
+<h2 id="AOF-持久化"><a href="#AOF-持久化" class="headerlink" title="AOF 持久化"></a>AOF 持久化</h2><p>将写命令添加到 AOF 文件（Append Only File）的末尾。</p>
+<p>使用 AOF 持久化需要设置同步选项，从而确保写命令什么时候会同步到磁盘文件上。这是因为对文件进行写入并不会马上将内容同步到磁盘上，而是先存储到缓冲区，然后由操作系统决定什么时候同步到磁盘。有以下同步选项：</p>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>同步频率</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>always</td>
+<td>每个写命令都同步</td>
+</tr>
+<tr>
+<td>everysec</td>
+<td>每秒同步一次</td>
+</tr>
+<tr>
+<td>no</td>
+<td>让操作系统来决定何时同步</td>
+</tr>
+<tr>
+<td>always</td>
+<td>选项会严重减低服务器的性能；</td>
+</tr>
+<tr>
+<td>everysec</td>
+<td>选项比较合适，可以保证系统崩溃时只会丢失一秒左右的数据，并且 Redis 每秒执行一次同步对服务器性能几乎没有任何影响；</td>
+</tr>
+</tbody>
+</table>
+<p>no 选项并不能给服务器性能带来多大的提升，而且也会增加系统崩溃时数据丢失的数量。<br>随着服务器写请求的增多，AOF 文件会越来越大。Redis 提供了一种将 AOF 重写的特性，能够去除 AOF 文件中的冗余写命令。</p>
+<h1 id="事务"><a href="#事务" class="headerlink" title="事务"></a>事务</h1><p>一个事务包含了多个命令，服务器在执行事务期间，不会改去执行其它客户端的命令请求。</p>
+<p>事务中的多个命令被一次性发送给服务器，而不是一条一条发送，这种方式被称为流水线，它可以减少客户端与服务器之间的网络通信次数从而提升性能。</p>
+<p>Redis 最简单的事务实现方式是使用 MULTI 和 EXEC 命令将事务操作包围起来。</p>
+<h1 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h1><p>Redis 服务器是一个事件驱动程序。</p>
+<h2 id="文件事件"><a href="#文件事件" class="headerlink" title="文件事件"></a>文件事件</h2><p>服务器通过套接字与客户端或者其它服务器进行通信，文件事件就是对套接字操作的抽象。</p>
+<p>Redis 基于 Reactor 模式开发了自己的网络事件处理器，使用 I/O 多路复用程序来同时监听多个套接字，并将到达的事件传送给文件事件分派器，分派器会根据套接字产生的事件类型调用相应的事件处理器。</p>
+<h2 id="时间事件"><a href="#时间事件" class="headerlink" title="时间事件"></a>时间事件</h2><p>服务器有一些操作需要在给定的时间点执行，时间事件是对这类定时操作的抽象。</p>
+<p>时间事件又分为：</p>
+<ul>
+<li>定时事件：是让一段程序在指定的时间之内执行一次；</li>
+<li>周期性事件：是让一段程序每隔指定时间就执行一次。<br>Redis 将所有时间事件都放在一个无序链表中，通过遍历整个链表查找出已到达的时间事件，并调用相应的事件处理器。</li>
+</ul>
+<h2 id="事件的调度与执行"><a href="#事件的调度与执行" class="headerlink" title="事件的调度与执行"></a>事件的调度与执行</h2><p>服务器需要不断监听文件事件的套接字才能得到待处理的文件事件，但是不能一直监听，否则时间事件无法在规定的时间内执行，因此监听时间应该根据距离现在最近的时间事件来决定。</p>
+<p>事件调度与执行由 aeProcessEvents 函数负责，伪代码如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">aeProcessEvents</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 获取到达时间离当前时间最接近的时间事件</span></span><br><span class="line">    time_event = aeSearchNearestTimer()</span><br><span class="line">    <span class="comment"># 计算最接近的时间事件距离到达还有多少毫秒</span></span><br><span class="line">    remaind_ms = time_event.when - unix_ts_now()</span><br><span class="line">    <span class="comment"># 如果事件已到达，那么 remaind_ms 的值可能为负数，将它设为 0</span></span><br><span class="line">    <span class="keyword">if</span> remaind_ms &lt; <span class="number">0</span>:</span><br><span class="line">        remaind_ms = <span class="number">0</span></span><br><span class="line">    <span class="comment"># 根据 remaind_ms 的值，创建 timeval</span></span><br><span class="line">    timeval = create_timeval_with_ms(remaind_ms)</span><br><span class="line">    <span class="comment"># 阻塞并等待文件事件产生，最大阻塞时间由传入的 timeval 决定</span></span><br><span class="line">    aeApiPoll(timeval)</span><br><span class="line">    <span class="comment"># 处理所有已产生的文件事件</span></span><br><span class="line">    procesFileEvents()</span><br><span class="line">    <span class="comment"># 处理所有已到达的时间事件</span></span><br><span class="line">    processTimeEvents()</span><br><span class="line">将 aeProcessEvents 函数置于一个循环里面，加上初始化和清理函数，就构成了 Redis 服务器的主函数，伪代码如下：</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 初始化服务器</span></span><br><span class="line">    init_server()</span><br><span class="line">    <span class="comment"># 一直处理事件，直到服务器关闭为止</span></span><br><span class="line">    <span class="keyword">while</span> server_is_not_shutdown():</span><br><span class="line">        aeProcessEvents()</span><br><span class="line">    <span class="comment"># 服务器关闭，执行清理操作</span></span><br><span class="line">    clean_server()</span><br></pre></td></tr></table></figure></p>
+<h1 id="复制"><a href="#复制" class="headerlink" title="复制"></a>复制</h1><p>通过使用 slaveof host port 命令来让一个服务器成为另一个服务器的从服务器。</p>
+<p>一个从服务器只能有一个主服务器，并且不支持主主复制。</p>
+<h2 id="连接过程"><a href="#连接过程" class="headerlink" title="连接过程"></a>连接过程</h2><p>主服务器创建快照文件，发送给从服务器，并在发送期间使用缓冲区记录执行的写命令。快照文件发送完毕之后，开始向从服务器发送存储在缓冲区中的写命令；</p>
+<p>从服务器丢弃所有旧数据，载入主服务器发来的快照文件，之后从服务器开始接受主服务器发来的写命令；</p>
+<p>主服务器每执行一次写命令，就向从服务器发送相同的写命令。</p>
+<h2 id="主从链"><a href="#主从链" class="headerlink" title="主从链"></a>主从链</h2><p>随着负载不断上升，主服务器可能无法很快地更新所有从服务器，或者重新连接和重新同步从服务器将导致系统超载。为了解决这个问题，可以创建一个中间层来分担主服务器的复制工作。中间层的服务器是最上层服务器的从服务器，又是最下层服务器的主服务器。<br><img src="https://github.com/CyC2018/CS-Notes/blob/master/docs/notes/pics/395a9e83-b1a1-4a1d-b170-d081e7bb5bab.png" alt></p>
+<h1 id="Sentinel"><a href="#Sentinel" class="headerlink" title="Sentinel"></a>Sentinel</h1><p>Sentinel（哨兵）可以监听集群中的服务器，并在主服务器进入下线状态时，自动从从服务器中选举出新的主服务器。</p>
+<h1 id="分片"><a href="#分片" class="headerlink" title="分片"></a>分片</h1><p>分片是将数据划分为多个部分的方法，可以将数据存储到多台机器里面，这种方法在解决某些问题时可以获得线性级别的性能提升。</p>
+<p>假设有 4 个 Reids 实例 R0，R1，R2，R3，还有很多表示用户的键 user:1，user:2，… ，有不同的方式来选择一个指定的键存储在哪个实例中。</p>
+<p>最简单的方式是范围分片，例如用户 id 从 0~1000 的存储到实例 R0 中，用户 id 从 1001~2000 的存储到实例 R1 中，等等。但是这样需要维护一张映射范围表，维护操作代价很高。<br>还有一种方式是哈希分片，使用 CRC32 哈希函数将键转换为一个数字，再对实例数量求模就能知道应该存储的实例。<br>根据执行分片的位置，可以分为三种分片方式：</p>
+<ul>
+<li>客户端分片：客户端使用一致性哈希等算法决定键应当分布到哪个节点。</li>
+<li>代理分片：将客户端请求发送到代理上，由代理转发请求到正确的节点上。</li>
+<li>服务器分片：Redis Cluster</li>
+</ul>
+</div><div class="tags"><a href="/tags/redis/">redis</a><a href="/tags/NoSQL/">NoSQL</a></div><div class="post-nav"><a class="pre" href="/2019/03/11/分布式锁方案/">分布式锁方案</a><a class="next" href="/2019/03/07/MySQL/">MySQL</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"><input type="hidden" name="sitesearch" value="https://SvizzerChow.github.io"></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Sentinel/">Sentinel</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/sharding-jdbc/">sharding-jdbc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/">分布式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/并发/">并发</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据库/">数据库</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/虚拟机/">虚拟机</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/原子性/" style="font-size: 15px;">原子性</a> <a href="/tags/BASE理论/" style="font-size: 15px;">BASE理论</a> <a href="/tags/虚拟机/" style="font-size: 15px;">虚拟机</a> <a href="/tags/JavaAgent/" style="font-size: 15px;">JavaAgent</a> <a href="/tags/集合/" style="font-size: 15px;">集合</a> <a href="/tags/可见性/" style="font-size: 15px;">可见性</a> <a href="/tags/内存模型/" style="font-size: 15px;">内存模型</a> <a href="/tags/MESI/" style="font-size: 15px;">MESI</a> <a href="/tags/volatile/" style="font-size: 15px;">volatile</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/channel/" style="font-size: 15px;">channel</a> <a href="/tags/NIO/" style="font-size: 15px;">NIO</a> <a href="/tags/限流/" style="font-size: 15px;">限流</a> <a href="/tags/降级/" style="font-size: 15px;">降级</a> <a href="/tags/熔断/" style="font-size: 15px;">熔断</a> <a href="/tags/Sentinel/" style="font-size: 15px;">Sentinel</a> <a href="/tags/源码解析/" style="font-size: 15px;">源码解析</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/NoSQL/" style="font-size: 15px;">NoSQL</a> <a href="/tags/CAP理论/" style="font-size: 15px;">CAP理论</a> <a href="/tags/long/" style="font-size: 15px;">long</a> <a href="/tags/double/" style="font-size: 15px;">double</a> <a href="/tags/并发/" style="font-size: 15px;">并发</a> <a href="/tags/sentinel/" style="font-size: 15px;">sentinel</a> <a href="/tags/zookeeper/" style="font-size: 15px;">zookeeper</a> <a href="/tags/分布式锁/" style="font-size: 15px;">分布式锁</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分库分表/" style="font-size: 15px;">分库分表</a> <a href="/tags/多线程/" style="font-size: 15px;">多线程</a> <a href="/tags/线程池/" style="font-size: 15px;">线程池</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/FutureTask/" style="font-size: 15px;">FutureTask</a> <a href="/tags/AbstractExecutorService/" style="font-size: 15px;">AbstractExecutorService</a> <a href="/tags/ThreadPoolExecutor/" style="font-size: 15px;">ThreadPoolExecutor</a> <a href="/tags/ScheduledThreadPoolExecutor/" style="font-size: 15px;">ScheduledThreadPoolExecutor</a> <a href="/tags/缓存/" style="font-size: 15px;">缓存</a> <a href="/tags/缓存行/" style="font-size: 15px;">缓存行</a> <a href="/tags/轮询/" style="font-size: 15px;">轮询</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/sharding-jdbc/" style="font-size: 15px;">sharding-jdbc</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/12/09/Netty之旅14ChannelHandler/">Netty解析十二：ChannelHandler</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/08/Netty之旅13ChannelPipeline/">Netty解析十一：ChannelPipeline与DefaultChannelPipeline</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/07/netty之旅12Channel/">Netty解析十：channel与AbstractNioChannel</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/06/volatile几个场景总结/">volatile几个场景总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/05/long和double使用volatile实现原子性/">volatile long/double原子读写原理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/04/缓存行优化/">缓存行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/03/MESI与内存屏障/">既然有了MESI协议为什么还要volatile来保证可见性</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/02/Netty之旅11SingleThreadEventLoop/">Netty解析九：EventLoop的基类SingleThreadEventLoop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/01/Netty之旅10Promise/">Netty解析八：可写的Future类【Promise】</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/30/Netty之旅9FastThreadLocal/">Netty解析七：快速的FastThreadLocal</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017-2020 <a href="/." rel="nofollow">SvizzerChow's Blog.</a><a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn"> 浙icp备330500251067号</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

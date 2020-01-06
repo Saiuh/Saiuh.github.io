@@ -1,0 +1,126 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta name="generator" content="Hexo 3.9.0"><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="我的个人博客"><title>数据库基础 | SvizzerChow's Blog</title><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/normalize/8.0.1/normalize.min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/pure/1.0.0/grids-responsive-min.css"><link rel="stylesheet" href="//lib.baomitu.com/font-awesome/4.7.0/css/font-awesome.min.css"><script type="text/javascript" src="//lib.baomitu.com/jquery/3.4.0/jquery.min.js"></script><link rel="icon" mask sizes="any" href="/favicon.ico"><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">数据库基础</h1><a id="logo" href="/.">SvizzerChow's Blog</a><p class="description">Leaning</p></div><div id="nav-menu"><a class="current" href="/."><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div class="pure-g" id="layout"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">数据库基础</h1><div class="post-meta">Mar 5, 2019<span> | </span><span class="category"><a href="/categories/数据库/">数据库</a></span></div><div class="post-content"><h1 id="ACID"><a href="#ACID" class="headerlink" title="ACID"></a>ACID</h1><ol>
+<li>原子性（Atomicity）<br>事务被视为不可分割的最小单元，事务的所有操作要么全部提交成功，要么全部失败回滚。</li>
+</ol>
+<p>回滚可以用回滚日志来实现，回滚日志记录着事务所执行的修改操作，在回滚时反向执行这些修改操作即可。</p>
+<ol start="2">
+<li><p>一致性（Consistency）<br>数据库在事务执行前后都保持一致性状态。在一致性状态下，所有事务对一个数据的读取结果都是相同的。</p>
+</li>
+<li><p>隔离性（Isolation）<br>一个事务所做的修改在最终提交以前，对其它事务是不可见的。</p>
+</li>
+<li><p>持久性（Durability）<br>一旦事务提交，则其所做的修改将会永远保存到数据库中。即使系统发生崩溃，事务执行的结果也不能丢失。</p>
+</li>
+</ol>
+<p>使用重做日志来保证持久性。<br><a id="more"></a></p>
+<hr>
+<p>事务的 ACID 特性概念简单，但不是很好理解，主要是因为这几个特性不是一种平级关系：</p>
+<ul>
+<li>只有满足一致性，事务的执行结果才是正确的。</li>
+<li>在无并发的情况下，事务串行执行，隔离性一定能够满足。此时只要能满足原子性，就一定能满足一致性。</li>
+<li>在并发的情况下，多个事务并行执行，事务不仅要满足原子性，还需要满足隔离性，才能满足一致性。</li>
+<li>事务满足持久化是为了能应对数据库崩溃的情况。</li>
+</ul>
+<h1 id="并发一致性问题"><a href="#并发一致性问题" class="headerlink" title="并发一致性问题"></a>并发一致性问题</h1><h2 id="修改丢失"><a href="#修改丢失" class="headerlink" title="修改丢失"></a>修改丢失</h2><p>A, B两个事物进行修改操作，A将记录改为M，A改完后B将记录改为N，然后A再读取记录就会发现记录已经不是M了。</p>
+<h2 id="读脏数据"><a href="#读脏数据" class="headerlink" title="读脏数据"></a>读脏数据</h2><p>A事物对记录修改，B事物读取了修改的内容，然后A事物撤销了修改，B读取的就是脏数据</p>
+<h2 id="不可重复读"><a href="#不可重复读" class="headerlink" title="不可重复读"></a>不可重复读</h2><p>A事物读取记录，B事物对记录进行修改，A事物再次读取记录发现与前一次不一样。</p>
+<h2 id="幻读"><a href="#幻读" class="headerlink" title="幻读"></a>幻读</h2><p>A事物读取某个范围内的数据，B事物在这个范围中插入一条数据，A事物再次查询数据与第一次查询不一致</p>
+<h1 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h1><p>MySQL 中提供了两种封锁粒度：行级锁以及表级锁。</p>
+<p>应该尽量只锁定需要修改的那部分数据，而不是所有的资源。锁定的数据量越少，发生锁争用的可能就越小，系统的并发程度就越高。</p>
+<p>但是加锁需要消耗资源，锁的各种操作（包括获取锁、释放锁、以及检查锁状态）都会增加系统开销。因此封锁粒度越小，系统开销就越大。</p>
+<p>在选择封锁粒度时，需要在锁开销和并发程度之间做一个权衡。</p>
+<h2 id="读写锁"><a href="#读写锁" class="headerlink" title="读写锁"></a>读写锁</h2><ul>
+<li>排它锁（Exclusive），简写为 X 锁，又称写锁。</li>
+<li>共享锁（Shared），简写为 S 锁，又称读锁。<br>有以下两个规定：</li>
+<li>一个事务对数据对象 A 加了 X 锁，就可以对 A 进行读取和更新。加锁期间其它事务不能对 A 加任何锁。</li>
+<li>一个事务对数据对象 A 加了 S 锁，可以对 A 进行读取操作，但是不能进行更新操作。加锁期间其它事务能对 A 加 S 锁，但是不能加 X 锁。</li>
+</ul>
+<h2 id="意向锁"><a href="#意向锁" class="headerlink" title="意向锁"></a>意向锁</h2><p>使用意向锁（Intention Locks）可以更容易地支持多粒度封锁。</p>
+<p>在存在行级锁和表级锁的情况下，事务 T 想要对表 A 加 X 锁，就需要先检测是否有其它事务对表 A 或者表 A 中的任意一行加了锁，那么就需要对表 A 的每一行都检测一次，这是非常耗时的。</p>
+<p>意向锁在原来的 X/S 锁之上引入了 IX/IS，IX/IS 都是表锁，用来表示一个事务想要在表中的某个数据行上加 X 锁或 S 锁。有以下两个规定：</p>
+<ul>
+<li>一个事务在获得某个数据行对象的 S 锁之前，必须先获得表的 IS 锁或者更强的锁；</li>
+<li>一个事务在获得某个数据行对象的 X 锁之前，必须先获得表的 IX 锁。<br>通过引入意向锁，事务 T 想要对表 A 加 X 锁，只需要先检测是否有其它事务对表 A 加了 X/IX/S/IS 锁，如果加了就表示有其它事务正在使用这个表或者表中某一行的锁，因此事务 T 加 X 锁失败。</li>
+</ul>
+<h2 id="封锁协议"><a href="#封锁协议" class="headerlink" title="封锁协议"></a>封锁协议</h2><h3 id="三级封锁协议"><a href="#三级封锁协议" class="headerlink" title="三级封锁协议"></a>三级封锁协议</h3><p><strong>一级封锁协议</strong></p>
+<p>事务 T 要修改数据 A 时必须加 X 锁，直到 T 结束才释放锁。</p>
+<p>可以解决丢失修改问题，因为不能同时有两个事务对同一个数据进行修改，那么事务的修改就不会被覆盖。</p>
+<p><strong>二级封锁协议</strong></p>
+<p>在一级的基础上，要求读取数据 A 时必须加 S 锁，读取完马上释放 S 锁。</p>
+<p>可以解决读脏数据问题，因为如果一个事务在对数据 A 进行修改，根据 1 级封锁协议，会加 X 锁，那么就不能再加 S 锁了，也就是不会读入数据。</p>
+<p><strong>三级封锁协议</strong></p>
+<p>在二级的基础上，要求读取数据 A 时必须加 S 锁，直到事务结束了才能释放 S 锁。</p>
+<p>可以解决不可重复读的问题，因为读 A 时，其它事务不能对 A 加 X 锁，从而避免了在读的期间数据发生改变。</p>
+<h3 id="两段锁协议"><a href="#两段锁协议" class="headerlink" title="两段锁协议"></a>两段锁协议</h3><p>加锁和解锁分为两个阶段进行。</p>
+<p>可串行化调度是指，通过并发控制，使得并发执行的事务结果与某个串行执行的事务结果相同。</p>
+<p>事务遵循两段锁协议是保证可串行化调度的充分条件。例如以下操作满足两段锁协议，它是可串行化调度。</p>
+<blockquote>
+<p>lock-x(A)…lock-s(B)…lock-s(C)…unlock(A)…unlock(C)…unlock(B)<br>但不是必要条件，例如以下操作不满足两段锁协议，但是它还是可串行化调度。</p>
+</blockquote>
+<blockquote>
+<p>lock-x(A)…unlock(A)…lock-s(B)…unlock(B)…lock-s(C)…unlock(C)</p>
+</blockquote>
+<h2 id="MySQL-隐式与显示锁定"><a href="#MySQL-隐式与显示锁定" class="headerlink" title="MySQL 隐式与显示锁定"></a>MySQL 隐式与显示锁定</h2><p>MySQL 的 InnoDB 存储引擎采用两段锁协议，会根据隔离级别在需要的时候自动加锁，并且所有的锁都是在同一时刻被释放，这被称为隐式锁定。</p>
+<p>InnoDB 也可以使用特定的语句进行显示锁定：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">LOCK</span> <span class="keyword">In</span> <span class="keyword">SHARE</span> <span class="keyword">MODE</span>;</span><br><span class="line"><span class="keyword">SELECT</span> ... <span class="keyword">FOR</span> <span class="keyword">UPDATE</span>;</span><br></pre></td></tr></table></figure></p>
+<h1 id="隔离级别"><a href="#隔离级别" class="headerlink" title="隔离级别"></a>隔离级别</h1><p><strong>未提交读（READ UNCOMMITTED）</strong><br>事务中的修改，即使没有提交，对其它事务也是可见的。</p>
+<p><strong>提交读（READ COMMITTED）</strong><br>一个事务只能读取已经提交的事务所做的修改。换句话说，一个事务所做的修改在提交之前对其它事务是不可见的。</p>
+<p><strong>可重复读（REPEATABLE READ）</strong><br>保证在同一个事务中多次读取同样数据的结果是一样的。</p>
+<p><strong>可串行化（SERIALIZABLE）</strong><br>强制事务串行执行。</p>
+<h1 id="MySQL多版本并发控制"><a href="#MySQL多版本并发控制" class="headerlink" title="MySQL多版本并发控制"></a>MySQL多版本并发控制</h1><p>多版本并发控制（Multi-Version Concurrency Control, MVCC）是 MySQL 的 InnoDB 存储引擎实现隔离级别的一种具体方式，用于实现提交读和可重复读这两种隔离级别。而未提交读隔离级别总是读取最新的数据行，无需使用 MVCC。可串行化隔离级别需要对所有读取的行都加锁，单纯使用 MVCC 无法实现。</p>
+<h2 id="版本号"><a href="#版本号" class="headerlink" title="版本号"></a>版本号</h2><ul>
+<li>系统版本号：是一个递增的数字，每开始一个新的事务，系统版本号就会自动递增。</li>
+<li>事务版本号：事务开始时的系统版本号。</li>
+</ul>
+<h2 id="隐藏的列"><a href="#隐藏的列" class="headerlink" title="隐藏的列"></a>隐藏的列</h2><p>MVCC 在每行记录后面都保存着两个隐藏的列，用来存储两个版本号：</p>
+<ul>
+<li>创建版本号：指示创建一个数据行的快照时的系统版本号；</li>
+<li>删除版本号：如果该快照的删除版本号大于当前事务版本号表示该快照有效，否则表示该快照已经被删除了</li>
+</ul>
+<h2 id="Undo-日志"><a href="#Undo-日志" class="headerlink" title="Undo 日志"></a>Undo 日志</h2><p>MVCC 使用到的快照存储在 Undo 日志中，该日志通过回滚指针把一个数据行（Record）的所有快照连接起来。</p>
+<h2 id="实现过程"><a href="#实现过程" class="headerlink" title="实现过程"></a>实现过程</h2><p>以下实现过程针对可重复读隔离级别。</p>
+<p>当开始新一个事务时，该事务的版本号肯定会大于当前所有数据行快照的创建版本号，理解这一点很关键。</p>
+<ol>
+<li>SELECT<br>多个事务必须读取到同一个数据行的快照，并且这个快照是距离现在最近的一个有效快照。但是也有例外，如果有一个事务正在修改该数据行，那么它可以读取事务本身所做的修改，而不用和其它事务的读取结果一致。</li>
+</ol>
+<p>把没有对一个数据行做修改的事务称为 T，T 所要读取的数据行快照的创建版本号必须小于 T 的版本号，因为如果大于或者等于 T 的版本号，那么表示该数据行快照是其它事务的最新修改，因此不能去读取它。除此之外，T 所要读取的数据行快照的删除版本号必须大于 T 的版本号，因为如果小于等于 T 的版本号，那么表示该数据行快照是已经被删除的，不应该去读取它。</p>
+<ol start="2">
+<li><p>INSERT<br>将当前系统版本号作为数据行快照的创建版本号。</p>
+</li>
+<li><p>DELETE<br>将当前系统版本号作为数据行快照的删除版本号。</p>
+</li>
+<li><p>UPDATE<br>将当前系统版本号作为更新前的数据行快照的删除版本号，并将当前系统版本号作为更新后的数据行快照的创建版本号。可以理解为先执行 DELETE 后执行 INSERT。</p>
+</li>
+</ol>
+<h2 id="快照读与当前读"><a href="#快照读与当前读" class="headerlink" title="快照读与当前读"></a>快照读与当前读</h2><ol>
+<li><p>快照读<br>使用 MVCC 读取的是快照中的数据，这样可以减少加锁所带来的开销。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">table</span> ...;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>当前读<br>读取的是最新的数据，需要加锁。以下第一个语句需要加 S 锁，其它都需要加 X 锁。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">table</span> <span class="keyword">where</span> ? <span class="keyword">lock</span> <span class="keyword">in</span> <span class="keyword">share</span> <span class="keyword">mode</span>;</span><br><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> <span class="keyword">table</span> <span class="keyword">where</span> ? <span class="keyword">for</span> <span class="keyword">update</span>;</span><br><span class="line"><span class="keyword">insert</span>;</span><br><span class="line"><span class="keyword">update</span>;</span><br><span class="line"><span class="keyword">delete</span>;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h1 id="Next-Key-Locks"><a href="#Next-Key-Locks" class="headerlink" title="Next-Key Locks"></a>Next-Key Locks</h1><p>Next-Key Locks 是 MySQL 的 InnoDB 存储引擎的一种锁实现。</p>
+<p>MVCC 不能解决幻读的问题，Next-Key Locks 就是为了解决这个问题而存在的。在可重复读（REPEATABLE READ）隔离级别下，使用 MVCC + Next-Key Locks 可以解决幻读问题。</p>
+<p><strong>Next-Key Locks实际是Gap Locks + Record Locks</strong></p>
+<h2 id="Record-Locks"><a href="#Record-Locks" class="headerlink" title="Record Locks"></a>Record Locks</h2><p>锁定一个记录上的索引，而不是记录本身。</p>
+<p>如果表没有设置索引，InnoDB 会自动在主键上创建隐藏的聚簇索引，因此 Record Locks 依然可以使用。</p>
+<h2 id="Gap-Locks"><a href="#Gap-Locks" class="headerlink" title="Gap Locks"></a>Gap Locks</h2><p>锁定索引之间的间隙，但是不包含索引本身。例如当一个事务执行以下语句，其它事务就不能在 t.c 中插入 15。<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> c <span class="keyword">FROM</span> t <span class="keyword">WHERE</span> c <span class="keyword">BETWEEN</span> <span class="number">10</span> <span class="keyword">and</span> <span class="number">20</span> <span class="keyword">FOR</span> <span class="keyword">UPDATE</span>;</span><br></pre></td></tr></table></figure></p>
+<p>如果是单条查询：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> c <span class="keyword">FROM</span> t <span class="keyword">WHERE</span> c = <span class="number">15</span>;</span><br></pre></td></tr></table></figure></p>
+<ol>
+<li>此时15的前面是14后面是20，那么间隙锁的区间则为(14,20)；</li>
+<li>此时15的前面是14后面没有比它大的记录，那么间隙锁的区间则为(14,正无穷)；</li>
+<li>间隙锁不锁记录本身即可以修改c=15这条记录。  </li>
+</ol>
+<h2 id="Next-Key-Locks-1"><a href="#Next-Key-Locks-1" class="headerlink" title="Next-Key Locks"></a>Next-Key Locks</h2><p>它是 Record Locks 和 Gap Locks 的结合，不仅锁定一个记录上的索引，也锁定索引之间的间隙。例如一个索引包含以下值：10, 11, 13, and 20，那么就需要锁定以下区间：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(negative infinity, 10]</span><br><span class="line">(10, 11]</span><br><span class="line">(11, 13]</span><br><span class="line">(13, 20]</span><br><span class="line">(20, positive infinity)</span><br></pre></td></tr></table></figure></p>
+<p>如果是单条查询：<br><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> c <span class="keyword">FROM</span> t <span class="keyword">WHERE</span> c = <span class="number">15</span>;</span><br></pre></td></tr></table></figure></p>
+<p>那么Next-Key Locks锁定的区间为(13, 20]</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> c <span class="keyword">FROM</span> t <span class="keyword">WHERE</span> c = <span class="number">13</span>;</span><br></pre></td></tr></table></figure>
+<p>那么Next-Key Locks锁定的区间为(11, 20]</p>
+<h1 id="关系数据库设计理论"><a href="#关系数据库设计理论" class="headerlink" title="关系数据库设计理论"></a>关系数据库设计理论</h1><h2 id="函数依赖"><a href="#函数依赖" class="headerlink" title="函数依赖"></a>函数依赖</h2><p>记 A-&gt;B 表示 A 函数决定 B，也可以说 B 函数依赖于 A。</p>
+<p>如果 {A1，A2，… ，An} 是关系的一个或多个属性的集合，该集合函数决定了关系的其它所有属性并且是最小的，那么该集合就称为键码。</p>
+<p>对于 A-&gt;B，如果能找到 A 的真子集 A’，使得 A’-&gt; B，那么 A-&gt;B 就是部分函数依赖，否则就是完全函数依赖。</p>
+<p>对于 A-&gt;B，B-&gt;C，则 A-&gt;C 是一个传递函数依赖。</p>
+<p><strong>异常</strong><br>以下的学生课程关系的函数依赖为 Sno, Cname -&gt; Sname, Sdept, Mname, Grade，键码为 {Sno, Cname}。也就是说，确定学生和课程之后，就能确定其它信息。</p>
+<h2 id="范式"><a href="#范式" class="headerlink" title="范式"></a>范式</h2><h3 id="第一范式"><a href="#第一范式" class="headerlink" title="第一范式"></a>第一范式</h3><p>属性不可分。</p>
+<h3 id="第二范式"><a href="#第二范式" class="headerlink" title="第二范式"></a>第二范式</h3><p>每个非主属性完全函数依赖于键码。</p>
+<p>可以通过分解来满足。</p>
+<h3 id="第三范式"><a href="#第三范式" class="headerlink" title="第三范式"></a>第三范式</h3><p>非主属性不传递函数依赖于键码。</p>
+</div><div class="tags"><a href="/tags/MySQL/">MySQL</a></div><div class="post-nav"><a class="pre" href="/2019/03/07/MySQL/">MySQL</a><a class="next" href="/2019/03/04/网络基础/">网络基础</a></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form class="search-form" action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank"><input type="text" name="q" maxlength="20" placeholder="Search"><input type="hidden" name="sitesearch" value="https://SvizzerChow.github.io"></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/Java/">Java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Netty/">Netty</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/Sentinel/">Sentinel</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/redis/">redis</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/sharding-jdbc/">sharding-jdbc</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/分布式/">分布式</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/并发/">并发</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/数据库/">数据库</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/算法/">算法</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/虚拟机/">虚拟机</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/原子性/" style="font-size: 15px;">原子性</a> <a href="/tags/BASE理论/" style="font-size: 15px;">BASE理论</a> <a href="/tags/虚拟机/" style="font-size: 15px;">虚拟机</a> <a href="/tags/JavaAgent/" style="font-size: 15px;">JavaAgent</a> <a href="/tags/集合/" style="font-size: 15px;">集合</a> <a href="/tags/可见性/" style="font-size: 15px;">可见性</a> <a href="/tags/内存模型/" style="font-size: 15px;">内存模型</a> <a href="/tags/MESI/" style="font-size: 15px;">MESI</a> <a href="/tags/volatile/" style="font-size: 15px;">volatile</a> <a href="/tags/MySQL/" style="font-size: 15px;">MySQL</a> <a href="/tags/网络/" style="font-size: 15px;">网络</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/channel/" style="font-size: 15px;">channel</a> <a href="/tags/NIO/" style="font-size: 15px;">NIO</a> <a href="/tags/限流/" style="font-size: 15px;">限流</a> <a href="/tags/降级/" style="font-size: 15px;">降级</a> <a href="/tags/熔断/" style="font-size: 15px;">熔断</a> <a href="/tags/Sentinel/" style="font-size: 15px;">Sentinel</a> <a href="/tags/源码解析/" style="font-size: 15px;">源码解析</a> <a href="/tags/redis/" style="font-size: 15px;">redis</a> <a href="/tags/NoSQL/" style="font-size: 15px;">NoSQL</a> <a href="/tags/CAP理论/" style="font-size: 15px;">CAP理论</a> <a href="/tags/long/" style="font-size: 15px;">long</a> <a href="/tags/double/" style="font-size: 15px;">double</a> <a href="/tags/并发/" style="font-size: 15px;">并发</a> <a href="/tags/sentinel/" style="font-size: 15px;">sentinel</a> <a href="/tags/zookeeper/" style="font-size: 15px;">zookeeper</a> <a href="/tags/分布式锁/" style="font-size: 15px;">分布式锁</a> <a href="/tags/数据库/" style="font-size: 15px;">数据库</a> <a href="/tags/分库分表/" style="font-size: 15px;">分库分表</a> <a href="/tags/多线程/" style="font-size: 15px;">多线程</a> <a href="/tags/线程池/" style="font-size: 15px;">线程池</a> <a href="/tags/Java/" style="font-size: 15px;">Java</a> <a href="/tags/FutureTask/" style="font-size: 15px;">FutureTask</a> <a href="/tags/AbstractExecutorService/" style="font-size: 15px;">AbstractExecutorService</a> <a href="/tags/ThreadPoolExecutor/" style="font-size: 15px;">ThreadPoolExecutor</a> <a href="/tags/ScheduledThreadPoolExecutor/" style="font-size: 15px;">ScheduledThreadPoolExecutor</a> <a href="/tags/缓存/" style="font-size: 15px;">缓存</a> <a href="/tags/缓存行/" style="font-size: 15px;">缓存行</a> <a href="/tags/轮询/" style="font-size: 15px;">轮询</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/Spring/" style="font-size: 15px;">Spring</a> <a href="/tags/sharding-jdbc/" style="font-size: 15px;">sharding-jdbc</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最近文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2019/12/09/Netty之旅14ChannelHandler/">Netty解析十二：ChannelHandler</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/08/Netty之旅13ChannelPipeline/">Netty解析十一：ChannelPipeline与DefaultChannelPipeline</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/07/netty之旅12Channel/">Netty解析十：channel与AbstractNioChannel</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/06/volatile几个场景总结/">volatile几个场景总结</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/05/long和double使用volatile实现原子性/">volatile long/double原子读写原理</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/04/缓存行优化/">缓存行优化</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/03/MESI与内存屏障/">既然有了MESI协议为什么还要volatile来保证可见性</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/02/Netty之旅11SingleThreadEventLoop/">Netty解析九：EventLoop的基类SingleThreadEventLoop</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/12/01/Netty之旅10Promise/">Netty解析八：可写的Future类【Promise】</a></li><li class="post-list-item"><a class="post-list-link" href="/2019/11/30/Netty之旅9FastThreadLocal/">Netty解析七：快速的FastThreadLocal</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">Copyright © 2017-2020 <a href="/." rel="nofollow">SvizzerChow's Blog.</a><a rel="nofollow" target="_blank" href="http://www.beian.miit.gov.cn"> 浙icp备330500251067号</a> Powered by<a rel="nofollow" target="_blank" href="https://hexo.io"> Hexo.</a><a rel="nofollow" target="_blank" href="https://github.com/tufu9441/maupassant-hexo"> Theme</a> by<a rel="nofollow" target="_blank" href="https://github.com/pagecho"> Cho.</a></div></div></div><a class="show" id="rocket" href="#top"></a><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="//lib.baomitu.com/fancybox/3.5.7/jquery.fancybox.min.css"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
